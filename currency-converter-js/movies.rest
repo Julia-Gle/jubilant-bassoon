@@ -1,0 +1,224 @@
+@baseurl = http://localhost:8080
+
+### GET all movies (without filter)
+GET {{baseurl}}/movies
+
+### GET movie by id (200)
+GET {{baseurl}}/movies/13
+
+### GET movie by id (404)
+GET {{baseurl}}/movies/999
+
+### Filter based GET Calls (4 movies)
+GET {{baseurl}}/movies?revenueFrom=50000000&revenueTo=300000000
+
+### Filter based GET Calls (5 Movies)
+GET {{baseurl}}/movies?revenueTo=200000000
+
+### Filter based GET Calls (7 Movies)
+GET {{baseurl}}/movies?revenueFrom=200000000
+
+### Filter based GET Calls (Bad Request 400)
+GET {{baseurl}}/movies?revenueFrom=5000000000&revenueTo=300000000
+
+### Filter based GET Calls (Bad Request 400)
+GET {{baseurl}}/movies?revenueFrom=5000000000&revenueTo=300000000&wrong=pair
+
+### Filter based GET Calls (Bad Request 400)
+GET {{baseurl}}/movies?revenueFrom1=5000000000&revenueTo1=300000000
+
+### Create new Movie
+# @name postMovieRequest
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "Terminator 2: Judgment Day",
+    "tmdb_id": 280,
+    "year": 1981,
+    "revenue": 520000000,
+    "maincharacter": {
+        "firstname": "Arnold",
+        "lastname": "Schwarzenegger"
+    }
+}
+
+# Expect:
+# HTTP/1.1 201 Created
+# X-Powered-By: Express
+# Location: /movies/13
+# Content-Type: application/json; charset=utf-8
+# Content-Length: 159
+# ETag: W/"9f-ctyw9Dye/kFy9B31ZRz+eCc4Zk4"
+# Date: Tue, 20 Feb 2024 17:08:15 GMT
+# Connection: close
+
+# {
+#   "title": "Terminator 2: Judgment Day",
+#   "tmdb_id": 280,
+#   "year": 1991,
+#   "revenue": 520000000,
+#   "maincharacter": {
+#     "firstname": "Arnold",
+#     "lastname": "Schwarzenegger"
+#   },
+#   "id": 13
+# }
+
+### check if new movie was persisted 
+@entityId = {{ postMovieRequest.response.body.$.id }}
+
+### GET entitiy by NEW id - expect 200
+GET {{baseurl}}/movies/{{entityId}}
+
+
+## TEST the Bad-Requests by yourself and add your testcases here
+### !!!!!!!!!
+
+##### Test 1
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": 3,
+    "tmdb_id": 280,
+    "year": 1991,
+    "revenue": 520000000,
+    "maincharacter": {
+        "firstname": "Arnold",
+        "lastname": "Schwarzenegger"
+    }
+}
+
+#### Test 2
+
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "film",
+    "tmdb_id": 280,
+    "year": 1991,
+    "revenue": 5,
+    "maincharacter": {
+        "firstname": "Arnold",
+        "lastname": "Schwarzenegger"
+    }
+}
+
+#### Test 3
+
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel",
+    "tmdb_id": 280,
+    "year": 1991,
+    "revenue": 520000000,
+    "maincharacter": {
+        "firstname": 3,
+        "lastname": "Schwarzenegger"
+    }
+}
+
+### Put
+
+PUT {{baseurl}}/movies/14
+Content-Type: application/json
+
+{
+    "title": "Terminator 2: Judgment Day 1",
+    "tmdb_id": 280,
+    "year": 1980,
+    "revenue": 520000001,
+    "maincharacter": {
+        "firstname": "Arnold",
+        "lastname": "Schwarzenegger"
+    },
+    "id": 14
+}
+
+### delete existing
+DELETE {{baseurl}}/movies/13
+
+### delete non-existing
+DELETE {{baseurl}}/movies/100
+
+
+### Filter based GET Calls (2 movies)
+GET {{baseurl}}/movies?revenueFrom=50000000&revenueTo=300000000&titleContains=tor
+
+### Movie STATS
+GET {{baseurl}}/moviestats
+
+### Stats filtered by character
+GET {{baseurl}}/moviestats?maincharacter.lastname=Schwarzenegger
+
+### Test request for front-end
+GET {{baseurl}}/movies?revenueFrom=1&revenueTo=2&year=1
+
+### Tests for business rules
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel",
+    "year": 1981,
+    "revenue": 520000000
+}
+
+####
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel2",
+    "year": 1981
+}
+
+####
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel",
+    "year": 1981,
+    "revenue": 520000000
+}
+
+####
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel",
+    "year": 1990,
+    "revenue": 520000000
+}
+
+####
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel",
+    "year": 1989,
+    "revenue": 99999
+}
+
+####
+POST {{baseurl}}/movies
+Content-Type: application/json
+
+{
+    "title": "tollerTitel4",
+    "year": 1989,
+    "revenue": 100001,
+    "maincharacter": {
+        "firstname": "Arnold"
+    }
+}
+
+#### Test error-handler
+GET {{baseurl}}/error

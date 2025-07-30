@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Currency Converter</title>
+  <link rel="stylesheet" href="bootstrap.min.css" />
+  <script src="client.js"></script>
+</head>
+<body  class="bg-light" onload="init()">
+  <div class="container py-5">
+    <h1>Currency Converter</h1>
+
+<form id="convertForm" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <label class="form-label">From</label>
+    <select class="form-select" id="from" required>
+      <option value="" disabled selected>Select currency</option>
+
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">To</label>
+    <select class="form-select" id="to" required>
+      <option value="" disabled selected>Select currency</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Amount</label>
+    <input type="number" class="form-control" id="amount" placeholder="100" min="0.01" step="0.01" required />
+  </div>
+  <div class="col-md-3 d-grid">
+    <button type="button" class="btn btn-primary" onclick="convertCurrency()">Convert</button>
+  </div>
+</form>
+
+    <div id="resultCard" class="card d-none">
+      <div class="card-body">
+        <h5 class="card-title">Conversion Result</h5>
+        <p><strong>From:</strong> <span id="resultFrom"></span></p>
+        <p><strong>To:</strong> <span id="resultTo"></span></p>
+        <p><strong>Amount:</strong> <span id="resultAmount"></span></p>
+        <p><strong>Rate:</strong> <span id="resultRate"></span></p>
+        <p><strong>Converted Amount:</strong> <span id="resultValue"></span></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

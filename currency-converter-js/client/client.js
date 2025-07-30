@@ -94,9 +94,10 @@ function convertCurrency() {
   const to = document.getElementById("to").value;
   const amount = document.getElementById("amount").value;
   if (!from || !to || !amount) {
-    alert("Please fill in all fields");
+    alert("Fill in all Fields");
     return;
   }
+
 
   const xhr = new XMLHttpRequest();
   xhr.onload = function () {

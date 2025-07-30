@@ -1,3 +1,6 @@
+function init() {
+  loadCurrencies();
+}
 async function loadCurrencies() {
   try {
     const response = await fetch("/api/symbols");
@@ -71,10 +74,6 @@ async function loadCurrencies() {
       toSelect.add(option);
     });
   }
-}
-
-function init() {
-  loadCurrencies();
 }
 
 function convertCurrency() {

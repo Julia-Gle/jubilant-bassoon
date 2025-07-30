@@ -10,12 +10,14 @@ async function loadCurrencies() {
     const fromSelect = document.getElementById("from");
     const toSelect = document.getElementById("to");
 
-    while (fromSelect.options.length > 1) fromSelect.remove(1);
-    while (toSelect.options.length > 1) toSelect.remove(1);
+    for (let i = 0; i < currencyCodes.length; i++) {
+      const code = currencyCodes[i];
+      const currency = data[code];
 
-    for (const [code, currency] of Object.entries(data)) {
-      const option = new Option(`${currency.description} (${code})`, code);
-      fromSelect.add(option.cloneNode(true));
+      const optionText = currency.description + " (" + code + ")";
+      const option = new Option(optionText, code);
+
+      fromSelect.add(option);
       toSelect.add(option);
     }
 
@@ -60,7 +62,7 @@ async function loadCurrencies() {
     const fromSelect = document.getElementById("from");
     const toSelect = document.getElementById("to");
     currencies.sort((a, b) => a.name.localeCompare(b.name));
-    const prioCurrencies = ["EUR","USD","PLN"];
+    const prioCurrencies = ["EUR", "USD", "PLN"];
     const sortedCurrencies = [
       ...currencies.filter((c) => prioCurrencies.includes(c.code)),
       ...currencies.filter((c) => !prioCurrencies.includes(c.code)),
@@ -75,7 +77,18 @@ async function loadCurrencies() {
     });
   }
 }
+function switchCurrency() {
+  const fromSelect = document.getElementById("from");
+  const toSelect = document.getElementById("to");
 
+  const currentFrom = fromSelect.value;
+  const currentTo = toSelect.value;
+  fromSelect.value = currentTo;
+  toSelect.value = currentFrom;
+  if (document.getElementById("amount").value) {
+    convertCurrency();
+  }
+}
 function convertCurrency() {
   const from = document.getElementById("from").value;
   const to = document.getElementById("to").value;

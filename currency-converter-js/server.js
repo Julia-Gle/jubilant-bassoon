@@ -60,7 +60,29 @@ app.get("/api/convert", async (req, res) => {
     });
   }
 });
+app.get("/api/symbols", async (req, res) => {
+  try {
+    const response = await fetch(`https://api.exchangerate.host/live?access_key=${EXCHANGE_RATE_API_KEY}`);
+    const data = await response.json();
+    console.log(data);
+    console.log("hallo");
+    console.log(data.quotes);
+    if (!data.success) {
+      return res.status(400).json({
+        error: "Failed to fetch currency symbols",
+        details: data.error?.info || "Unknown error from exchange rate API",
+      });
+    }
 
+    res.json(data.quotes);
+  } catch (error) {
+    console.error("Error fetching currency symbols:", error);
+    res.status(500).json({
+      error: "Failed to fetch currency symbols",
+      details: error.message,
+    });
+  }
+});
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

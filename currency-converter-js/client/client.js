@@ -1,82 +1,85 @@
+
+
 function init() {
   loadCurrencies();
 }
+
 async function loadCurrencies() {
   try {
     const response = await fetch("/api/symbols");
-    if (!response.ok) throw new Error("Failed to load currencies");
+    if (!response.ok) throw new Error("Failed to load curencies");
     const data = await response.json();
-
+    
+    const currencies = new Set();
+    
+    for (const [pair] of Object.entries(data)) {
+      const currency = pair.substring(3);
+      currencies.add(currency);
+    }
+    
     const fromSelect = document.getElementById("from");
     const toSelect = document.getElementById("to");
 
-    for (let i = 0; i < currencyCodes.length; i++) {
-      const code = currencyCodes[i];
-      const currency = data[code];
+    fromSelect.innerHTML = '<option value="" disabled selected>Select currency</option>';
+    toSelect.innerHTML = '<option value="" disabled selected>Select currency</option>';
 
-      const optionText = currency.description + " (" + code + ")";
-      const option = new Option(optionText, code);
+    const prioCurrencies = ["EUR","PLN"];
+    prioCurrencies.forEach(code => {
+      if (currencies.has(code)) {
+        const option = new Option(`${code}`, code);
+        fromSelect.add(option);
+        toSelect.add(option.cloneNode(true));
+      }
+    });
 
-      fromSelect.add(option);
-      toSelect.add(option);
-    }
+    currencies.forEach(code => {
+      if (!prioCurrencies.includes(code)) {
+        const option = new Option(`${code}`, code);
+        fromSelect.add(option);
+        toSelect.add(option.cloneNode(true));
+      }
+    });
 
     fromSelect.value = "EUR";
     toSelect.value = "PLN";
   } catch (error) {
     console.error("Error loading currencies:", error);
-    const currencies = [
-      { code: "EUR", name: "Euro" },
-      { code: "USD", name: "US Dollar" },
-      { code: "GBP", name: "British Pound" },
-      { code: "PLN", name: "Polish Złoty" },
-      { code: "CHF", name: "Swiss Franc" },
-      { code: "JPY", name: "Japanese Yen" },
-      { code: "CAD", name: "Canadian Dollar" },
-      { code: "AUD", name: "Australian Dollar" },
-      { code: "CNY", name: "Chinese Yuan" },
-      { code: "HKD", name: "Hong Kong Dollar" },
-      { code: "NZD", name: "New Zealand Dollar" },
-      { code: "SEK", name: "Swedish Krona" },
-      { code: "NOK", name: "Norwegian Krone" },
-      { code: "DKK", name: "Danish Krone" },
-      { code: "SGD", name: "Singapore Dollar" },
-      { code: "KRW", name: "South Korean Won" },
-      { code: "TRY", name: "Turkish Lira" },
-      { code: "RUB", name: "Russian Ruble" },
-      { code: "INR", name: "Indian Rupee" },
-      { code: "BRL", name: "Brazilian Real" },
-      { code: "ZAR", name: "South African Rand" },
-      { code: "MXN", name: "Mexican Peso" },
-      { code: "HUF", name: "Hungarian Forint" },
-      { code: "CZK", name: "Czech Koruna" },
-      { code: "ILS", name: "Israeli Shekel" },
-      { code: "THB", name: "Thai Baht" },
-      { code: "MYR", name: "Malaysian Ringgit" },
-      { code: "PHP", name: "Philippine Peso" },
-      { code: "IDR", name: "Indonesian Rupiah" },
-      { code: "AED", name: "UAE Dirham" },
-      { code: "SAR", name: "Saudi Riyal" },
-    ];
-
-    const fromSelect = document.getElementById("from");
-    const toSelect = document.getElementById("to");
-    currencies.sort((a, b) => a.name.localeCompare(b.name));
-    const prioCurrencies = ["EUR", "USD", "PLN"];
-    const sortedCurrencies = [
-      ...currencies.filter((c) => prioCurrencies.includes(c.code)),
-      ...currencies.filter((c) => !prioCurrencies.includes(c.code)),
-    ];
-    sortedCurrencies.forEach((currency) => {
-      const option = new Option(
-        `${currency.name} (${currency.code})`,
-        currency.code
-      );
-      fromSelect.add(option.cloneNode(true));
-      toSelect.add(option);
-    });
+    fallbackCurrencies();
   }
 }
+
+
+
+// function fallbackCurrencies() {
+//   const currencies = [
+//     { code: "EUR", name: "Euro" },
+//     { code: "USD", name: "US Dollar" },
+//     { code: "GBP", name: "British Pound" },
+//     { code: "PLN", name: "Polish Złoty" },
+//     { code: "CHF", name: "Swiss Franc" },
+//   ];
+
+//   const fromSelect = document.getElementById("from");
+//   const toSelect = document.getElementById("to");
+  
+//   fromSelect.innerHTML = '<option value="" disabled selected>Select currency</option>';
+//   toSelect.innerHTML = '<option value="" disabled selected>Select currency</option>';
+
+//   const prioCurrencies = ["EUR", "USD", "PLN"];
+//   const sortedCurrencies = [
+//     ...currencies.filter(c => prioCurrencies.includes(c.code)),
+//     ...currencies.filter(c => !prioCurrencies.includes(c.code)).sort((a, b) => a.name.localeCompare(b.name))
+//   ];
+
+//   sortedCurrencies.forEach(currency => {
+//     const option = new Option(`${currency.name} (${currency.code})`, currency.code);
+//     fromSelect.add(option);
+//     toSelect.add(option.cloneNode(true));
+//   });
+
+//   fromSelect.value = "EUR";
+//   toSelect.value = "PLN";
+// }
 function switchCurrency() {
   const fromSelect = document.getElementById("from");
   const toSelect = document.getElementById("to");

@@ -1,0 +1,50 @@
+### Todo App API Tests
+
+### 1. Health Check
+GET http://localhost:3000/health
+
+### 2. Benutzer registrieren
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "SecurePass123"
+}
+
+### 3. Benutzer anmelden
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "SecurePass123"
+}
+
+### 4. Profil abrufen (geschützt)
+GET http://localhost:3000/api/auth/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 5. Abmelden (geschützt)
+POST http://localhost:3000/api/auth/logout
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 6. Registrierung mit ungültigen Daten (Test)
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "ab",
+  "email": "invalid-email",
+  "password": "123"
+}
+
+### 7. Login mit falschen Daten (Test)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "wrong@example.com",
+  "password": "wrongpassword"
+}

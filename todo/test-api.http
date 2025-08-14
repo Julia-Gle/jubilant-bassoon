@@ -30,7 +30,15 @@ Authorization: Bearer YOUR_JWT_TOKEN_HERE
 POST http://localhost:3000/api/auth/logout
 Authorization: Bearer YOUR_JWT_TOKEN_HERE
 
-### 6. Registrierung mit ungültigen Daten (Test)
+### 6. Admin-Bereich testen (Rollen-basierte Autorisierung)
+GET http://localhost:3000/api/auth/admin
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 7. User-spezifisches Profil (Ownership-Prüfung)
+GET http://localhost:3000/api/auth/user/YOUR_USER_ID/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 8. Registrierung mit ungültigen Daten (Test)
 POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
@@ -40,7 +48,7 @@ Content-Type: application/json
   "password": "123"
 }
 
-### 7. Login mit falschen Daten (Test)
+### 9. Login mit falschen Daten (Test)
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
@@ -48,3 +56,124 @@ Content-Type: application/json
   "email": "wrong@example.com",
   "password": "wrongpassword"
 }
+
+### 10. Geschützte Route ohne Token (Test)
+GET http://localhost:3000/api/auth/profile
+
+### 11. Geschützte Route mit ungültigem Token (Test)
+GET http://localhost:3000/api/auth/profile
+Authorization: Bearer invalid_token_here
+
+### 12. Admin-Route ohne Admin-Rolle (Test)
+GET http://localhost:3000/api/auth/admin
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 13. User-Profil mit falscher User-ID (Test)
+GET http://localhost:3000/api/auth/user/wrong-user-id/profile
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 14. Optional authentifizierte Route ohne Token
+GET http://localhost:3000/api/auth/optional
+
+### 15. Optional authentifizierte Route mit Token
+GET http://localhost:3000/api/auth/optional
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### ===== TODO TESTS =====
+
+### 16. Neues Todo erstellen
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "title": "Mein erstes Todo",
+  "description": "Das ist eine Beschreibung für mein erstes Todo",
+  "status": "TODO",
+  "dueDate": "2024-12-31T23:59:59.000Z"
+}
+
+### 17. Alle Todos abrufen
+GET http://localhost:3000/api/todos
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 18. Todo nach Status filtern (TODO)
+GET http://localhost:3000/api/todos/status/TODO
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 19. Todo nach Status filtern (IN_PROGRESS)
+GET http://localhost:3000/api/todos/status/IN_PROGRESS
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 20. Todo nach Status filtern (DONE)
+GET http://localhost:3000/api/todos/status/DONE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 21. Überfällige Todos abrufen
+GET http://localhost:3000/api/todos/overdue
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 22. Einzelnes Todo abrufen
+GET http://localhost:3000/api/todos/TODO_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 23. Todo aktualisieren
+PUT http://localhost:3000/api/todos/TODO_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "title": "Aktualisiertes Todo",
+  "description": "Neue Beschreibung",
+  "status": "IN_PROGRESS",
+  "dueDate": "2024-12-25T23:59:59.000Z"
+}
+
+### 24. Todo-Status ändern
+PATCH http://localhost:3000/api/todos/TODO_ID_HERE/status
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "status": "DONE"
+}
+
+### 25. Todo löschen
+DELETE http://localhost:3000/api/todos/TODO_ID_HERE
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 26. Todo erstellen mit minimalen Daten
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "title": "Minimales Todo"
+}
+
+### 27. Todo erstellen mit ungültigen Daten (Test)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "title": "",
+  "status": "INVALID_STATUS",
+  "dueDate": "invalid-date"
+}
+
+### 28. Todo ohne Authentifizierung erstellen (Test)
+POST http://localhost:3000/api/todos
+Content-Type: application/json
+
+{
+  "title": "Todo ohne Auth"
+}
+
+### 29. Todo mit falscher ID abrufen (Test)
+GET http://localhost:3000/api/todos/invalid-uuid
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+### 30. Todo eines anderen Users abrufen (Test)
+GET http://localhost:3000/api/todos/OTHER_USER_TODO_ID
+Authorization: Bearer YOUR_JWT_TOKEN_HERE

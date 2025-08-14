@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, requireRole, requireOwnership } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -224,6 +224,53 @@ router.post('/logout', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server Fehler beim Abmelden',
+      errorCode: 'SERVER_ERROR'
+    });
+  }
+});
+
+// Beispiel-Route mit Rollen-basierter Autorisierung
+router.get('/admin', authenticateToken, requireRole(['admin']), async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Admin-Bereich erfolgreich aufgerufen',
+      data: {
+        user: req.user,
+        role: req.user.role || 'user'
+      }
+    });
+  } catch (error) {
+    console.error('Admin-Fehler:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Fehler im Admin-Bereich',
+      errorCode: 'SERVER_ERROR'
+    });
+  }
+});
+
+// Beispiel-Route mit Ownership-Prüfung
+router.get('/user/:userId/profile', authenticateToken, requireOwnership('userId'), async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'User-Profil erfolgreich abgerufen',
+      data: {
+        user: {
+          id: req.user.id,
+          username: req.user.username,
+          email: req.user.email,
+          created_at: req.user.created_at
+        },
+        requestedUserId: req.params.userId
+      }
+    });
+  } catch (error) {
+    console.error('User-Profil-Fehler:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Fehler beim Abrufen des User-Profils',
       errorCode: 'SERVER_ERROR'
     });
   }

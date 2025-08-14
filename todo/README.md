@@ -1,24 +1,30 @@
-# Todo App API mit Express.js, Sequelize und PostgreSQL
+# Todo App API mit flexibler Datenbank-Unterstützung
 
-Eine vollständige REST API mit Express.js, Sequelize ORM und PostgreSQL Datenbank.
+Eine vollständige REST API mit Express.js und flexibler Datenbank-Unterstützung (In-Memory, SQLite, PostgreSQL, MongoDB).
 
 ## 🚀 Features
 
 - **Vollständige REST API** mit Express.js
+- **Flexible Datenbank-Unterstützung**:
+  - **In-Memory (SQLite)** - Standard für Entwicklung
+  - **SQLite** - Datei-basierte SQL-Datenbank
+  - **PostgreSQL** - Robuste SQL-Datenbank
+  - **MongoDB** - NoSQL-Datenbank
 - **User Model** mit UUID, username, email, password (gehashed) und createdAt
+- **Todo Model** mit UUID, title, description, status (TODO/IN_PROGRESS/DONE), dueDate, userId
 - **JWT Authentication** für sichere Anmeldung
 - **Automatisches Password-Hashing** mit bcryptjs
-- **PostgreSQL Integration** mit Sequelize ORM
 - **Input Validierung** mit express-validator
 - **Sicherheits-Middleware** (Helmet, CORS, Rate Limiting)
 - **Geschützte Routen** mit JWT Middleware
+- **Rollen-basierte Autorisierung** und Ownership-Prüfung
 - **Fehlerbehandlung** und Logging
 
 ## 📋 Voraussetzungen
 
 - Node.js (Version 14 oder höher)
-- PostgreSQL Datenbank
 - npm oder yarn
+- **Optional**: PostgreSQL oder MongoDB (nur wenn nicht In-Memory verwendet wird)
 
 ## 🛠️ Installation
 
@@ -31,12 +37,47 @@ npm install
 ```bash
 cp env.example .env
 ```
-Bearbeite die `.env` Datei mit deinen Datenbank-Einstellungen.
 
-3. **PostgreSQL Datenbank erstellen:**
-```sql
-CREATE DATABASE todo_app;
+## 🗄️ Datenbank-Konfiguration
+
+Die App unterstützt verschiedene Datenbanktypen. Standardmäßig wird eine **In-Memory-Datenbank** verwendet.
+
+### In-Memory (Standard)
+```env
+DB_TYPE=memory
 ```
+- Keine externe Datenbank erforderlich
+- Daten gehen beim Neustart verloren
+- Perfekt für Entwicklung und Tests
+
+### SQLite (Datei-basiert)
+```env
+DB_TYPE=sqlite
+SQLITE_PATH=./data/todo.db
+```
+- Daten werden in einer Datei gespeichert
+- Keine externe Datenbank erforderlich
+- Daten bleiben nach Neustart erhalten
+
+### PostgreSQL
+```env
+DB_TYPE=postgresql
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=todo_app
+DB_USER=postgres
+DB_PASSWORD=password
+```
+- Robuste SQL-Datenbank
+- Externe PostgreSQL-Installation erforderlich
+
+### MongoDB
+```env
+DB_TYPE=mongodb
+MONGODB_URI=mongodb://localhost:27017/todo_app
+```
+- NoSQL-Datenbank
+- Externe MongoDB-Installation erforderlich
 
 ## 🏃‍♂️ Verwendung
 
@@ -57,9 +98,21 @@ npm start
 - `POST /api/auth/login` - Benutzer anmelden
 - `GET /api/auth/profile` - Benutzerprofil abrufen (geschützt)
 - `POST /api/auth/logout` - Abmelden (geschützt)
+- `GET /api/auth/admin` - Admin-Bereich (geschützt, Admin-Rolle)
+- `GET /api/auth/user/:userId/profile` - User-spezifisches Profil (geschützt, Ownership)
+
+### Todos
+- `GET /api/todos` - Alle Todos des Users abrufen (geschützt)
+- `POST /api/todos` - Neues Todo erstellen (geschützt)
+- `GET /api/todos/:id` - Einzelnes Todo abrufen (geschützt, Ownership)
+- `PUT /api/todos/:id` - Todo aktualisieren (geschützt, Ownership)
+- `DELETE /api/todos/:id` - Todo löschen (geschützt, Ownership)
+- `PATCH /api/todos/:id/status` - Todo-Status ändern (geschützt, Ownership)
+- `GET /api/todos/status/:status` - Todos nach Status filtern (geschützt)
+- `GET /api/todos/overdue` - Überfällige Todos abrufen (geschützt)
 
 ### System
-- `GET /health` - Health Check
+- `GET /health` - Health Check (zeigt aktuellen Datenbank-Typ)
 
 ## 🧪 API Testing
 
@@ -75,8 +128,14 @@ curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"SecurePass123"}'
 
-# Profil abrufen (Token aus Login-Response verwenden)
-curl -X GET http://localhost:3000/api/auth/profile \
+# Todo erstellen
+curl -X POST http://localhost:3000/api/todos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"title":"Mein Todo","description":"Beschreibung","status":"TODO","dueDate":"2024-12-31T23:59:59.000Z"}'
+
+# Todos abrufen
+curl -X GET http://localhost:3000/api/todos \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -88,20 +147,24 @@ Verwende die `test-api.http` Datei für einfaches Testing.
 ```
 src/
 ├── config/
-│   └── database.js      # Sequelize Konfiguration
+│   └── database.js      # Flexible Datenbank-Konfiguration
 ├── models/
-│   └── User.js          # User Model
+│   ├── index.js         # Model-Beziehungen
+│   ├── User.js          # User Model (Sequelize + Mongoose)
+│   └── Todo.js          # Todo Model (Sequelize + Mongoose)
 ├── middleware/
-│   └── auth.js          # JWT Authentication Middleware
+│   ├── auth.js          # JWT Authentication Middleware
+│   └── README.md        # Middleware-Dokumentation
 ├── routes/
-│   └── auth.js          # Authentication Routes
+│   ├── auth.js          # Authentication Routes
+│   └── todos.js         # Todo Routes
 ├── server.js            # Express Server
 └── index.js             # Alte Hauptdatei (Beispiele)
 ```
 
-## 🗄️ User Model
+## 🗄️ Model-Schemas
 
-### Felder:
+### User Model
 - **id**: UUID (Primärschlüssel, automatisch generiert)
 - **username**: String (3-50 Zeichen, eindeutig)
 - **email**: String (E-Mail-Format, eindeutig)
@@ -109,40 +172,50 @@ src/
 - **created_at**: Timestamp (automatisch gesetzt)
 - **updated_at**: Timestamp (automatisch aktualisiert)
 
-### Methoden:
-- `validatePassword(password)`: Validiert ein Password
-- `updatePassword(newPassword)`: Ändert das Password
-- `findByUsername(username)`: Findet User nach Username
-- `findByEmail(email)`: Findet User nach E-Mail
-- `createUser(userData)`: Erstellt einen neuen User
+### Todo Model
+- **id**: UUID (Primärschlüssel, automatisch generiert)
+- **title**: String (1-255 Zeichen, erforderlich)
+- **description**: Text (optional)
+- **status**: Enum (TODO, IN_PROGRESS, DONE, Standard: TODO)
+- **dueDate**: Date (optional)
+- **userId**: UUID (Fremdschlüssel zu User, erforderlich)
+- **created_at**: Timestamp (automatisch gesetzt)
+- **updated_at**: Timestamp (automatisch aktualisiert)
 
 ## 🔐 Sicherheit
 
 - **Password-Hashing**: Automatisches Hashing mit bcryptjs (12 Salt-Rounds)
 - **Validierung**: Eingabevalidierung für alle Felder
 - **Eindeutigkeit**: Username und E-Mail sind eindeutig
+- **JWT-Token**: Sichere Token-basierte Authentifizierung
+- **Ownership-Prüfung**: User können nur ihre eigenen Ressourcen bearbeiten
+- **Rollen-basierte Autorisierung**: Flexible Berechtigungssysteme
 
-## 📊 Datenbank-Schema
+## 🔄 Datenbank wechseln
 
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(50) NOT NULL UNIQUE,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+Um die Datenbank zu wechseln, ändern Sie einfach die `DB_TYPE` in der `.env`-Datei:
 
--- Index für bessere Performance
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_users_email ON users(email);
+```env
+# Für In-Memory (Standard)
+DB_TYPE=memory
+
+# Für PostgreSQL
+DB_TYPE=postgresql
+
+# Für MongoDB
+DB_TYPE=mongodb
+
+# Für SQLite
+DB_TYPE=sqlite
 ```
+
+Die App passt sich automatisch an und verwendet die entsprechende Datenbank-Implementierung.
 
 ## 🧪 Beispiel-Verwendung
 
+### User-Operationen:
 ```javascript
-// User erstellen
+// User erstellen (funktioniert mit allen Datenbanktypen)
 const user = await User.create({
   username: 'testuser',
   email: 'test@example.com',
@@ -154,21 +227,48 @@ const isValid = await user.validatePassword('securepassword123');
 
 // User finden
 const foundUser = await User.findByUsername('testuser');
+```
 
-// Password ändern
-await foundUser.updatePassword('newpassword456');
+### Todo-Operationen:
+```javascript
+// Todo erstellen
+const todo = await Todo.create({
+  title: 'Mein Todo',
+  description: 'Beschreibung',
+  status: 'TODO',
+  dueDate: new Date('2024-12-31'),
+  userId: user.id
+});
+
+// Todos nach Status filtern
+const doneTodos = await Todo.findByUserIdAndStatus(user.id, 'DONE');
+
+// Todo-Status ändern
+await todo.markAsDone();
+
+// Überfällige Todos finden
+const overdueTodos = await Todo.findOverdue();
 ```
 
 ## 🔧 Konfiguration
 
 Die Konfiguration erfolgt über Umgebungsvariablen:
 
-### Datenbank:
+### Datenbank-Auswahl:
+- `DB_TYPE`: Datenbank-Typ (memory, sqlite, postgresql, mongodb)
+
+### SQLite:
+- `SQLITE_PATH`: Pfad zur SQLite-Datei (Standard: :memory:)
+
+### PostgreSQL:
 - `DB_HOST`: Datenbank-Host (Standard: localhost)
 - `DB_PORT`: Datenbank-Port (Standard: 5432)
 - `DB_NAME`: Datenbank-Name (Standard: todo_app)
 - `DB_USER`: Datenbank-Benutzer (Standard: postgres)
 - `DB_PASSWORD`: Datenbank-Passwort (Standard: password)
+
+### MongoDB:
+- `MONGODB_URI`: MongoDB-Verbindungs-URI (Standard: mongodb://localhost:27017/todo_app)
 
 ### Server:
 - `PORT`: Server-Port (Standard: 3000)
